@@ -1,0 +1,10 @@
+{
+  "name": "sistema-substituicao-professores",
+  "version": "1.0.0",
+  "description": "Sistema inteligente de substituicao de professores",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "private": true
+}
