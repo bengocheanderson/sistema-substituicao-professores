@@ -55,21 +55,18 @@ Regras:
 
 ## 4. Prioridade entre segmentos
 
-O sistema não deverá ser fixo em um único segmento.
+O sistema deverá determinar o segmento da turma que precisa de substituição. A busca deverá começar por professores que atuam normalmente nesse segmento, esgotando os candidatos elegíveis antes de recorrer a professores de outros segmentos.
 
-A busca deverá começar pelo segmento do professor faltante, esgotando as possibilidades válidas desse segmento antes de recorrer a outros.
+Para turmas dos segmentos abaixo, a ordem de busca será:
 
-Exemplos:
+- **Ensino Médio:** Ensino Médio → Anos Finais → Anos Iniciais.
+- **Anos Finais:** Anos Finais → Ensino Médio → Anos Iniciais.
+- **Anos Iniciais:** Anos Iniciais → Anos Finais → Ensino Médio.
+- **Educação Infantil:** buscar somente dentro da própria Educação Infantil.
 
-- Falta nos Anos Finais: começar pelos Anos Finais.
-- Falta no Ensino Médio: começar pelo Ensino Médio.
-- Falta nos Anos Iniciais: começar pelos Anos Iniciais.
+Para turmas dos demais segmentos, a Educação Infantil será um recurso excepcional de emergência, considerado somente depois de esgotadas as alternativas normais listadas para o segmento da turma. Cada indicação da Educação Infantil nessa condição deverá gerar um aviso ao coordenador, identificando explicitamente que se trata de uma alternativa emergencial. Os professores também deverão estar autorizados para atuar na turma e atender aos demais critérios.
 
-A ordem de busca dos demais segmentos deverá ser configurável conforme as prioridades definidas pela escola.
-
-Professores de outros segmentos não deverão ser utilizados enquanto ainda existirem possibilidades válidas no segmento original.
-
-A prioridade do segmento deverá ser respeitada antes da otimização da quantidade de períodos cobertos.
+Em cada segmento da ordem de busca, o sistema deverá esgotar a prioridade atual de candidatos antes de passar à seguinte. Só deverá avançar para o próximo segmento quando não houver mais candidatos elegíveis no segmento pesquisado. A ordem de segmentos e de prioridades deverá ser respeitada antes da otimização da quantidade de períodos cobertos.
 
 ## 5. Regras especiais dos Anos Iniciais
 
@@ -78,44 +75,48 @@ Os professores dos Anos Iniciais possuem uma característica específica: são r
 Por isso:
 
 1. Não podem ser considerados disponíveis apenas porque possuem alguns horários vagos.
-2. Precisam estar liberados de suas responsabilidades com a própria turma durante todo o período necessário.
+2. Só poderão ser considerados nos períodos em que estiverem explicitamente liberados de suas responsabilidades com a própria turma. A liberação de parte do turno não deverá ser interpretada como liberação do turno inteiro.
 3. Só poderão ser considerados para substituição se puderem assumir pelo menos dois períodos.
-4. Os dois ou mais períodos podem ser distribuídos entre diferentes turmas e substituições no mesmo turno.
+4. Os dois ou mais períodos podem ser não consecutivos e distribuídos entre diferentes turmas e substituições no mesmo turno, desde que cada período esteja explicitamente liberado da responsabilidade do professor com sua própria turma.
 5. Não poderão ser indicados para cobrir somente um período.
 
-A verificação deverá considerar a situação da turma pela qual o professor é responsável e a disponibilidade real de todo o turno necessário.
+A verificação deverá considerar a situação da turma pela qual o professor é responsável e a disponibilidade real de cada período proposto.
 
 ## 6. Disponibilidade e elegibilidade
 
 Para ser recomendado, o professor deverá:
 
 - Estar autorizado para o segmento e a disciplina da substituição, conforme as regras de autorização da escola.
-- Estar disponível no período solicitado.
+- Não possuir aula ou compromisso conhecido no período solicitado e ter a disponibilidade real confirmada pelo coordenador antes da efetivação.
 - Não possuir outra substituição confirmada no mesmo horário.
 - Não possuir conflito com outra aula ou compromisso registrado.
 - Não ter recusado aquela mesma substituição naquele período.
 
-A disponibilidade deverá ser analisada considerando a grade completa do dia, e não somente o período isolado.
+A disponibilidade deverá ser analisada considerando a grade do dia e o período exato. HA é um indicador para ordenar candidatos, não confirmação de disponibilidade. A situação `----------` significa somente que não há aula registrada naquele período; não confirma que o professor esteja disponível.
 
-## 7. Prioridade dos candidatos dentro do segmento
+A inclusão provisória de candidatos cujo período exato esteja marcado como `----------` deverá permanecer desativada por padrão. Só poderá ser habilitada por uma regra explícita da escola, e a lista deverá identificar que a disponibilidade precisa ser verificada pelo coordenador.
 
-Dentro do segmento prioritário, deverão ser considerados:
+## 7. Prioridade dos candidatos
 
-1. Professores com HA no período necessário.
-2. Professores livres no período, independentemente de possuírem HA.
-3. Professores livres no período e que possuam aulas em outros horários do mesmo dia.
+Antes de aplicar as prioridades abaixo, o sistema deverá verificar autorização para o segmento e a disciplina, conflitos e as demais restrições obrigatórias.
 
-A aplicação desses níveis deverá respeitar as autorizações e demais restrições.
+Para cada segmento pesquisado, deverão ser esgotadas as prioridades nesta ordem:
 
-**Observação:** os níveis 2 e 3 ainda precisam de refinamento, pois podem se sobrepor. A distinção exata deverá ser validada antes da implementação definitiva.
+1. **Prioridade 1 — HA no período exato:** professor que atua normalmente no segmento pesquisado, está autorizado para a turma e possui HA exatamente no período da substituição. HA não confirma a disponibilidade real; o coordenador deverá contatar o professor e registrar a resposta.
+2. **Prioridade 2 — atividade em outro período do dia:** professor livre no período da substituição, com aula ou HA registrada em outro período daquele mesmo dia. A disponibilidade real deverá ser verificada pelo coordenador.
+3. **Prioridade 3 — nenhuma atividade escolar no dia:** professor livre no período da substituição e cuja ausência de atividades escolares naquele dia esteja efetivamente confirmada. Só poderá ser considerado se assumir pelo menos dois períodos de substituição no dia; esses períodos podem ser em turmas diferentes e não consecutivos.
+
+Em qualquer prioridade, a grade não confirma a disponibilidade real. O coordenador deverá contatar os candidatos em ordem: os candidatos seguintes da mesma prioridade só deverão ser contatados se o anterior recusar ou não estiver disponível. Quando um professor aceitar, o período deverá ser reservado imediatamente e o sistema deverá recalcular as demais atribuições. A prioridade seguinte só deverá ser consultada quando não houver candidato viável na prioridade atual.
+
+Um período `----------` não comprova que o professor esteja disponível nem que não tenha outras atividades; portanto, não confirma a ausência de atividades exigida pela prioridade 3 e não deverá incluí-lo automaticamente nas prioridades 2 ou 3. Isso não impede que o professor seja considerado posteriormente, caso o coordenador confirme sua disponibilidade real e ele satisfaça os critérios da prioridade aplicável. O sistema não poderá confirmar essa disponibilidade automaticamente. Enquanto a disponibilidade permanecer desconhecida, a inclusão provisória só poderá ocorrer se uma regra explícita da escola estiver habilitada, com aviso de que o coordenador precisa verificá-la.
 
 ## 8. Quantidade mínima de períodos
 
-Quando professores de outros segmentos forem utilizados, deverá ser respeitada a regra de cobertura mínima de dois períodos.
+Um candidato da prioridade 3 cuja ausência de atividades escolares naquele dia esteja confirmada deverá ser considerado somente se puder assumir pelo menos dois períodos de substituição naquele dia. A ausência de aula registrada (`----------`) não basta para concluir que o professor não possui atividades.
 
-Para professores dos Anos Iniciais, aplica-se adicionalmente a regra especial da seção 5: disponibilidade de todo o período necessário e liberação das responsabilidades com a própria turma.
+Para professores dos Anos Iniciais, aplica-se adicionalmente a regra especial da seção 5: somente os períodos explicitamente liberados da responsabilidade com a própria turma poderão ser considerados.
 
-Os períodos mínimos podem ser distribuídos entre diferentes turmas, desde que não existam conflitos.
+Os dois ou mais períodos podem ser distribuídos entre diferentes turmas e não precisam ser consecutivos, desde que não existam conflitos.
 
 ## 9. Análise de faltas simultâneas
 
@@ -133,22 +134,24 @@ Deverá procurar uma distribuição global que:
 
 A ordem em que o coordenador cadastrar as faltas não deverá determinar o resultado.
 
+Em faltas simultâneas, os períodos de substituição atribuídos ao mesmo professor deverão ser contabilizados em conjunto no total das substituições daquele dia. Contam-se os períodos distintos; um mesmo período não poderá ser contado mais de uma vez nem gerar atribuições simultâneas para o professor. A regra mínima da prioridade 3 será verificada sobre esse conjunto diário.
+
 ## 10. Critérios de otimização
 
 Após respeitar as prioridades e restrições obrigatórias, o sistema deverá utilizar a seguinte ordem de otimização:
 
-1. **Prioridade do segmento original:** esgotar primeiro as possibilidades válidas do segmento do professor faltante.
+1. **Ordem de busca de segmentos e candidatos:** respeitar a ordem definida na seção 4 e esgotar as prioridades de candidatos definidas na seção 7 antes de avançar.
 2. **Maior cobertura:** maximizar a quantidade total de períodos cobertos.
 3. **Grades completas:** entre soluções que cobrem a mesma quantidade de períodos, preferir aquela que deixa mais professores faltantes com suas grades totalmente cobertas.
 4. **Menos substitutos:** persistindo o empate, preferir a solução que utiliza menos professores substitutos.
-5. **Proximidade das disciplinas:** persistindo o empate, preferir a combinação com maior compatibilidade entre as disciplinas dos substitutos e a disciplina do professor faltante.
-6. **Alternância:** se ainda houver empate, alternar as recomendações entre os professores igualmente qualificados.
+5. **Proximidade de conteúdo:** entre candidatos igualmente qualificados, considerar a proximidade entre os conteúdos das disciplinas quando relevante. Esse critério é complementar e nunca substitui a autorização exigida.
+6. **Alternância:** persistindo o empate, priorizar o professor que recebeu menos indicações nos últimos 30 dias.
 
 A prioridade de segmento não poderá ser ignorada apenas para obter uma cobertura maior utilizando outro segmento.
 
-## 11. Proximidade entre disciplinas
+## 11. Proximidade de conteúdo
 
-A proximidade entre disciplinas será utilizada como critério de desempate, nunca como substituta da autorização.
+A proximidade de conteúdo entre disciplinas será utilizada como critério complementar de desempate, nunca como substituta da autorização.
 
 Tabela provisória:
 
@@ -171,7 +174,7 @@ Essa tabela é provisória e deverá ser configurável, permitindo alterações 
 
 ## 12. Alternância de recomendações
 
-Quando dois ou mais professores apresentarem exatamente as mesmas condições de elegibilidade e prioridade, o sistema deverá alternar as recomendações.
+Quando dois ou mais professores apresentarem exatamente as mesmas condições de elegibilidade e prioridade, a alternância será baseada no histórico dos últimos 30 dias. Depois de considerar a proximidade de conteúdo quando relevante, deverá ser priorizado quem recebeu menos indicações nesse período.
 
 Objetivos:
 
@@ -179,7 +182,7 @@ Objetivos:
 - Distribuir melhor as oportunidades.
 - Considerar o histórico de recomendações.
 
-A alternância nunca deverá superar critérios mais importantes, como autorização, disponibilidade ou prioridade de segmento.
+A alternância nunca deverá superar critérios mais importantes, como autorização, disponibilidade, prioridade de candidato ou ordem de busca do segmento.
 
 ## 13. Aceitação e recusa
 
@@ -240,18 +243,14 @@ O sistema nunca deverá:
 - Atribuir duas turmas ao mesmo professor no mesmo dia e período.
 - Interpretar HA como disponibilidade confirmada.
 - Interpretar ausência de aula registrada como disponibilidade garantida.
+- Tratar `----------` como disponibilidade confirmada ou incluí-lo automaticamente na prioridade 2.
 - Ignorar recusas ainda válidas.
 - Utilizar professores de outros segmentos antes de esgotar as possibilidades válidas do segmento original.
+- Utilizar a Educação Infantil como opção regular antes de esgotar os demais segmentos autorizados.
 
 ## 17. Pontos ainda pendentes de definição
 
-Antes da implementação definitiva, deverão ser esclarecidos:
-
-1. A ordem de prioridade dos segmentos secundários para cada segmento original.
-2. A distinção exata entre os níveis 2 e 3 de prioridade dos candidatos.
-3. Como a regra de dois períodos mínimos de professores de outros segmentos será aplicada em situações de múltiplas faltas simultâneas.
-4. Como o sistema deverá tratar situações em que uma professora dos Anos Iniciais esteja liberada de sua turma, mas somente parte do turno esteja disponível.
-5. Como será calculada a alternância das recomendações e qual período de histórico será considerado.
+A tabela de proximidade de conteúdo da seção 11 permanece provisória e deverá ser validada e configurada conforme a realidade da escola.
 
 ---
 
